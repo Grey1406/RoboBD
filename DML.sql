@@ -119,13 +119,13 @@ create procedure createCharacter(IN p1 int,IN p2 DATETIME)
 
 # Создание матчей и их истории
 
-create procedure createMatch(IN p1 int)
+create procedure createMatch(IN p1 int,IN p2 DATETIME)
   BEGIN
     SET @TypeNum = 1;
     label1: LOOP
       IF p1 > 0
       THEN
-        SET @DateStart = NOW() - INTERVAL ROUND(RAND() * 200, 0) + 200 DAY;
+        SET @DateStart = p2 - INTERVAL ROUND(RAND() * 200, 0) DAY;
         SET @DateEND = @DateStart+INTERVAL ROUND(RAND() * 20, 0) MINUTE;
         SET @Character1 = (SELECT id_character
                            FROM `character`
@@ -215,10 +215,10 @@ create procedure createMatch(IN p1 int)
 
 # 1 пачка
 call createCharacter(@countPlayers,NOW()-INTERVAL 200 day );
-call createMatch(@countMatches);
+call createMatch(@countMatches,NOW()-INTERVAL 200 day);
 # 2 пачка
 call createCharacter(@countPlayers,NOW());
-call createMatch(@countMatches*2);
+call createMatch(@countMatches*2,NOW());
 
 drop procedure createCharacter;
 drop procedure createMatch;
