@@ -25,17 +25,28 @@ create trigger character_AFTER_INSERT
       param2       = NEW.param1, param3 = NEW.param1, modified = NOW();
   END;
 
+create trigger character_AFTER_UPDATE
+  after UPDATE
+  on `character`
+  for each row
+  BEGIN
+    INSERT INTO character_history
+    Set
+      id_character = NEW.id_character, param1 = NEW.param1,
+      param2       = NEW.param1, param3 = NEW.param1, modified = NOW();
+  END;
+
 # Создание таблицы character_history - история изменения персонажей
 DROP TABLE IF EXISTS `character_history`;
 create table character_history
 (
-  id_character_history int   auto_increment      not null
+  id_character_history int auto_increment not null
     primary key,
-  id_character         int         null,
-  param1               smallint(6) not null,
-  param2               smallint(6) not null,
-  param3               smallint(6) not null,
-  modified             datetime    not null
+  id_character         int                null,
+  param1               smallint(6)        not null,
+  param2               smallint(6)        not null,
+  param3               smallint(6)        not null,
+  modified             datetime           not null
 );
 
 # Создание таблицы character_type - тип персонажа, базовые статы и тд
