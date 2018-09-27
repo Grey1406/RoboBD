@@ -22,7 +22,7 @@ create trigger character_AFTER_INSERT
     INSERT INTO character_history
     Set
       id_character = NEW.id_character, param1 = NEW.param1,
-      param2       = NEW.param1, param3 = NEW.param1, modified = NOW();
+      param2       = NEW.param1, param3 = NEW.param1, modified = NEW.modified;
   END;
 
 create trigger character_AFTER_UPDATE
@@ -33,7 +33,7 @@ create trigger character_AFTER_UPDATE
     INSERT INTO character_history
     Set
       id_character = NEW.id_character, param1 = NEW.param1,
-      param2       = NEW.param1, param3 = NEW.param1, modified = NOW();
+      param2       = NEW.param1, param3 = NEW.param1, modified = NEW.modified;
   END;
 
 # Создание таблицы character_history - история изменения персонажей
@@ -112,24 +112,22 @@ create table player
 (
   id_player int auto_increment
     primary key,
-  nickname varchar(20) not null,
-  level tinyint default '1' not null,
-  rating smallint(6) default '0' not null,
-  created datetime not null,
-  modified datetime not null
-)
-;
+  nickname  varchar(20)             not null,
+  level     tinyint default '1'     not null,
+  rating    smallint(6) default '0' not null,
+  created   datetime                not null,
+  modified  datetime                not null
+);
 
 create trigger player_AFTER_INSERT
-  after INSERT on player
+  after INSERT
+  on player
   for each row
   BEGIN
     INSERT INTO player_achievement
     Set
       id_player = NEW.id_player;
-  END
-;
-
+  END;
 
 # Создание таблицы player_achievement - ачивки (не) полученные игроком
 DROP TABLE IF EXISTS `player_achievement`;
@@ -137,12 +135,11 @@ create table player_achievement
 (
   id_player_achievement int auto_increment
     primary key,
-  id_player int not null,
-  achievement1 binary(1) default '0' not null,
-  achievement2 binary(1) default '0' not null,
-  achievement3 binary(1) default '0' not null
-)
-;
+  id_player             int                   not null,
+  achievement1          binary(1) default '0' not null,
+  achievement2          binary(1) default '0' not null,
+  achievement3          binary(1) default '0' not null
+);
 # Создание таблицы player_history - история развития персонажа
 DROP TABLE IF EXISTS `player_history`;
 create table player_history

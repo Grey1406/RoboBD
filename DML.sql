@@ -14,7 +14,7 @@ create procedure doiterate(IN p1 int)
       THEN
         #         данные о игроках
         INSERT INTO player (level, nickname, rating, created, modified)
-        VALUES (p1% 100, CONCAT('test', p1), p1% 1000, NOW(), NOW());
+        VALUES (p1% 100, CONCAT('test', p1), p1% 1000, NOW()-INTERVAL 10 DAY ,NOW()-INTERVAL 10 DAY);
         #         данные о их регистрации
         INSERT INTO player_autorisation
         (id_player, full_name, email, login, password, created)
@@ -22,7 +22,7 @@ create procedure doiterate(IN p1 int)
                  FROM player
                  WHERE player.nickname = CONCAT('test', p1)),
                 CONCAT('Такой то такойтович', p1), CONCAT('trueEmail', p1, '@verno.com'),
-                CONCAT('testLogin', p1), CONCAT('testPassword', p1), NOW());
+                CONCAT('testLogin', p1), CONCAT('testPassword', p1), NOW()-INTERVAL 10 DAY);
         SET p1 = p1 - 1;
         ITERATE label1;
       END IF;
@@ -58,14 +58,14 @@ create procedure doiterate(IN p1 int)
         VALUES ((SELECT id_player
                  FROM player
                  WHERE player.nickname = CONCAT('test', p1)),
-                @TypeNum, 25 + @TypeNum, 25 + @TypeNum * @TypeNum, 27, NOW(), NOW());
+                @TypeNum, 25 + @TypeNum, 25 + @TypeNum * @TypeNum, 27, NOW()-INTERVAL 10 DAY, NOW()-INTERVAL 10 DAY);
         SET @TypeNum = (@TypeNum) % 3 + 1;
         INSERT INTO `character` (id_player, id_character_type, param1,
                                  param2, param3, created, modified)
         VALUES ((SELECT id_player
                  FROM player
                  WHERE player.nickname = CONCAT('test', p1)),
-                @TypeNum, 25 + @TypeNum, 29, 25 + @TypeNum * @TypeNum, NOW(), NOW());
+                @TypeNum, 25 + @TypeNum, 29, 25 + @TypeNum * @TypeNum,NOW()-INTERVAL 7 DAY, NOW()-INTERVAL 7 DAY);
         SET p1 = p1 - 1;
         ITERATE label1;
       END IF;
@@ -80,9 +80,9 @@ UPDATE `character`
 SET param1 = param1 + 10,
   param2   = param2 + 11,
   param3   = param3 + 12,
-  modified = NOW();
+  modified = NOW()-INTERVAL 6 DAY;
 UPDATE `character`
 SET param1 = param1 + 21,
   param2   = param2 + 26,
   param3   = param3 + 28,
-  modified = NOW();
+  modified = NOW()-INTERVAL 4 DAY;
