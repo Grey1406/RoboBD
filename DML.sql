@@ -90,12 +90,12 @@ SET param1 = param1 + 21,
 
 # Создание типов матчей
 
-INSERT INTO homestead.match_type (id_match_type, name, discription) VALUES (2, '2x2', 'just 2x2');
-INSERT INTO homestead.match_type (id_match_type, name, discription) VALUES (2, '2x2s', 'special 2x2');
-INSERT INTO homestead.match_type (id_match_type, name, discription) VALUES (2, '3x3', 'just 3x3');
-INSERT INTO homestead.match_type (id_match_type, name, discription) VALUES (2, '3x3s', 'special 3x3');
-INSERT INTO homestead.match_type (id_match_type, name, discription) VALUES (2, '5x5', 'just 5x5');
-INSERT INTO homestead.match_type (id_match_type, name, discription) VALUES (2, '5x5s', 'special 5x5');
+INSERT INTO match_type (id_match_type, name, discription) VALUES (2, '2x2', 'just 2x2');
+INSERT INTO match_type (id_match_type, name, discription) VALUES (2, '2x2s', 'special 2x2');
+INSERT INTO match_type (id_match_type, name, discription) VALUES (2, '3x3', 'just 3x3');
+INSERT INTO match_type (id_match_type, name, discription) VALUES (2, '3x3s', 'special 3x3');
+INSERT INTO match_type (id_match_type, name, discription) VALUES (2, '5x5', 'just 5x5');
+INSERT INTO match_type (id_match_type, name, discription) VALUES (2, '5x5s', 'special 5x5');
 
 # Создание типов действий в истории матчей
 
