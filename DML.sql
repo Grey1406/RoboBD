@@ -5,7 +5,7 @@
 # Внесение данных о игроках и
 # их регистрации
 
-SET @i=1000;
+SET @i=100;
 drop procedure IF EXISTS doiterate;
 create procedure doiterate(IN p1 int)
   BEGIN
@@ -31,6 +31,9 @@ create procedure doiterate(IN p1 int)
   END;
 call doiterate(@i);
 drop procedure doiterate;
+
+
+
 
 # Создание типов персонажей
 

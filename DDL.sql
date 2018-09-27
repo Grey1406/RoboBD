@@ -112,23 +112,37 @@ create table player
 (
   id_player int auto_increment
     primary key,
-  nickname  varchar(20)             not null,
-  level     tinyint default '1'     not null,
-  rating    smallint(6) default '0' not null,
-  created   datetime                not null,
-  modified  datetime                not null
-);
+  nickname varchar(20) not null,
+  level tinyint default '1' not null,
+  rating smallint(6) default '0' not null,
+  created datetime not null,
+  modified datetime not null
+)
+;
+
+create trigger player_AFTER_INSERT
+  after INSERT on player
+  for each row
+  BEGIN
+    INSERT INTO player_achievement
+    Set
+      id_player = NEW.id_player;
+  END
+;
+
 
 # Создание таблицы player_achievement - ачивки (не) полученные игроком
 DROP TABLE IF EXISTS `player_achievement`;
 create table player_achievement
 (
-  id           int auto_increment
+  id_player_achievement int auto_increment
     primary key,
+  id_player int not null,
   achievement1 binary(1) default '0' not null,
   achievement2 binary(1) default '0' not null,
   achievement3 binary(1) default '0' not null
-);
+)
+;
 # Создание таблицы player_history - история развития персонажа
 DROP TABLE IF EXISTS `player_history`;
 create table player_history
