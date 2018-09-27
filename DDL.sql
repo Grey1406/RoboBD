@@ -127,6 +127,27 @@ create trigger player_AFTER_INSERT
     INSERT INTO player_achievement
     Set
       id_player = NEW.id_player;
+    INSERT INTO player_history
+    Set
+      id_player = NEW.id_player,
+      nickname  = NEW.nickname,
+      level     = NEW.level,
+      rating    = NEW.rating,
+      modified  = NOW();
+  END;
+
+create trigger player_AFTER_UPDATE
+  after UPDATE
+  on player
+  for each row
+  BEGIN
+    INSERT INTO player_history
+    Set
+      id_player = NEW.id_player,
+      nickname  = NEW.nickname,
+      level     = NEW.level,
+      rating    = NEW.rating,
+      modified  = NOW();
   END;
 
 # Создание таблицы player_achievement - ачивки (не) полученные игроком
@@ -146,11 +167,13 @@ create table player_history
 (
   id_player_history int auto_increment
     primary key,
-  id_player         int         not null,
-  level             tinyint     not null,
-  rating            smallint(6) not null,
-  modified          datetime    not null
-);
+  id_player int not null,
+  nickname varchar(20) not null,
+  level tinyint not null,
+  rating smallint(6) not null,
+  modified datetime not null
+)
+;
 # Создание таблицы player_autorisation - авторизация игрока
 DROP TABLE IF EXISTS `player_autorisation`;
 create table player_autorisation
