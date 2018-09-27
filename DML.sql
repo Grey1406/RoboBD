@@ -17,7 +17,7 @@ create procedure doiterate(IN p1 int)
         SET @Date = NOW() - INTERVAL ROUND(RAND() * 200, 0) + 300 DAY;
         #         данные о игроках
         INSERT INTO player (level, nickname, rating, created, modified)
-        VALUES (1, CONCAT('test', p1), 1, NOW() - INTERVAL 10 DAY, @Date);
+        VALUES (1, CONCAT('test', p1), 1, @Date, @Date);
         #         данные о их регистрации
         INSERT INTO player_autorisation
         (id_player, full_name, email, login, password, created)
@@ -79,17 +79,16 @@ VALUES (3, 'killed_m', 'killed be mob');
 INSERT INTO match_history_action (id_match_history_action, name, discription)
 VALUES (4, 'get_ach', 'get achievement');
 
-# Создание персонажей для игроков
-# 1 пачка
+# Создание персонажей для игроков и их истории
 
-create procedure doiterate(IN p1 int)
+create procedure createCharacter(IN p1 int,IN p2 DATETIME)
   BEGIN
     SET @TypeNum = 1;
     label1: LOOP
       IF p1 > 0
       THEN
         SET @TypeNum = (@TypeNum) % 3 + 1;
-        SET @Date = NOW() - INTERVAL ROUND(RAND() * 200, 0) + 200 DAY;
+        SET @Date = p2 - INTERVAL ROUND(RAND() * 200, 0) DAY;
         INSERT INTO `character` (id_player, id_character_type, param1,
                                  param2, param3, created, modified)
         VALUES ((SELECT id_player
@@ -102,27 +101,25 @@ create procedure doiterate(IN p1 int)
       END IF;
       LEAVE label1;
     END LOOP label1;
+
+    # Создание истории персонажей для игроков путем обновления персонажей
+
+    UPDATE `character`
+    SET param1 = param1 + ROUND(RAND() * 30, 0),
+      param2   = param2 + ROUND(RAND() * 30, 0),
+      param3   = param3 + ROUND(RAND() * 30, 0),
+      modified = modified + INTERVAL ROUND(RAND() * 100, 0) DAY;
+    UPDATE `character`
+    SET param1 = param1 + ROUND(RAND() * 30, 0),
+      param2   = param2 + ROUND(RAND() * 30, 0),
+      param3   = param3 + ROUND(RAND() * 30, 0),
+      modified = modified + INTERVAL ROUND(RAND() * 100, 0) DAY;
   END;
-call doiterate(@countPlayers);
-drop procedure doiterate;
-
-# Создание истории персонажей для игроков путем обновления персонажей
-
-UPDATE `character`
-SET param1 = param1 + ROUND(RAND() * 30, 0),
-  param2   = param2 + ROUND(RAND() * 30, 0),
-  param3   = param3 + ROUND(RAND() * 30, 0),
-  modified = NOW() - INTERVAL ROUND(RAND() * 3, 0) + 3 DAY;
-UPDATE `character`
-SET param1 = param1 + ROUND(RAND() * 30, 0),
-  param2   = param2 + ROUND(RAND() * 30, 0),
-  param3   = param3 + ROUND(RAND() * 30, 0),
-  modified = NOW() - INTERVAL ROUND(RAND() * 3, 0) DAY;
 
 
 # Создание матчей и их истории
 
-create procedure doiterate(IN p1 int)
+create procedure createMatch(IN p1 int)
   BEGIN
     SET @TypeNum = 1;
     label1: LOOP
@@ -152,49 +149,55 @@ create procedure doiterate(IN p1 int)
                    LIMIT 1);
 
         SET @DateAction = @DateStart+ INTERVAL ROUND(RAND() *TIME_TO_SEC(TIMEDIFF(@DateEND,@DateStart))) SECOND ;
-
         INSERT INTO `match_history`
         (id_match, id_character, id_match_history_action, created)
         VALUES (@id, @Character1, (SELECT id_match_history_action
                                    FROM match_history_action
                                    ORDER BY RAND()
                                    LIMIT 1), @DateAction);
+        SET @DateAction = @DateStart+ INTERVAL ROUND(RAND() *TIME_TO_SEC(TIMEDIFF(@DateEND,@DateStart))) SECOND ;
         INSERT INTO `match_history`
         (id_match, id_character, id_match_history_action, created)
         VALUES (@id, @Character1, (SELECT id_match_history_action
                                    FROM match_history_action
                                    ORDER BY RAND()
                                    LIMIT 1), @DateAction);
+        SET @DateAction = @DateStart+ INTERVAL ROUND(RAND() *TIME_TO_SEC(TIMEDIFF(@DateEND,@DateStart))) SECOND ;
         INSERT INTO `match_history`
         (id_match, id_character, id_match_history_action, created)
         VALUES (@id, @Character1, (SELECT id_match_history_action
                                    FROM match_history_action
                                    ORDER BY RAND()
                                    LIMIT 1), @DateAction);
+        SET @DateAction = @DateStart+ INTERVAL ROUND(RAND() *TIME_TO_SEC(TIMEDIFF(@DateEND,@DateStart))) SECOND ;
         INSERT INTO `match_history`
         (id_match, id_character, id_match_history_action, created)
         VALUES (@id, @Character1, (SELECT id_match_history_action
                                    FROM match_history_action
                                    ORDER BY RAND()
                                    LIMIT 1), @DateAction);
+        SET @DateAction = @DateStart+ INTERVAL ROUND(RAND() *TIME_TO_SEC(TIMEDIFF(@DateEND,@DateStart))) SECOND ;
         INSERT INTO `match_history`
         (id_match, id_character, id_match_history_action, created)
         VALUES (@id, @Character2, (SELECT id_match_history_action
                                    FROM match_history_action
                                    ORDER BY RAND()
                                    LIMIT 1), @DateAction);
+        SET @DateAction = @DateStart+ INTERVAL ROUND(RAND() *TIME_TO_SEC(TIMEDIFF(@DateEND,@DateStart))) SECOND ;
         INSERT INTO `match_history`
         (id_match, id_character, id_match_history_action, created)
         VALUES (@id, @Character2, (SELECT id_match_history_action
                                    FROM match_history_action
                                    ORDER BY RAND()
                                    LIMIT 1), @DateAction);
+        SET @DateAction = @DateStart+ INTERVAL ROUND(RAND() *TIME_TO_SEC(TIMEDIFF(@DateEND,@DateStart))) SECOND ;
         INSERT INTO `match_history`
         (id_match, id_character, id_match_history_action, created)
         VALUES (@id, @Character2, (SELECT id_match_history_action
                                    FROM match_history_action
                                    ORDER BY RAND()
                                    LIMIT 1), @DateAction);
+        SET @DateAction = @DateStart+ INTERVAL ROUND(RAND() *TIME_TO_SEC(TIMEDIFF(@DateEND,@DateStart))) SECOND ;
         INSERT INTO `match_history`
         (id_match, id_character, id_match_history_action, created)
         VALUES (@id, @Character2, (SELECT id_match_history_action
@@ -208,13 +211,14 @@ create procedure doiterate(IN p1 int)
       LEAVE label1;
     END LOOP label1;
   END;
-call doiterate(@countMatches);
-drop procedure doiterate;
 
 
-SET @DateStart = NOW() - INTERVAL ROUND(RAND() * 200, 0) + 200 DAY;
-SET @DateEND = @DateStart+INTERVAL ROUND(RAND() * 20, 0) MINUTE;
-SET @a=TIME_TO_SEC(TIMEDIFF(@DateEND,@DateStart));
-SET @DateAction = ROUND(RAND() *TIME_TO_SEC(TIMEDIFF(@DateEND,@DateStart)));
+# 1 пачка
+call createCharacter(@countPlayers,NOW()-INTERVAL 200 day );
+call createMatch(@countMatches);
+# 2 пачка
+call createCharacter(@countPlayers,NOW());
+call createMatch(@countMatches*2);
 
-SELECT  @DateAction,@a;
+drop procedure createCharacter;
+drop procedure createMatch;
