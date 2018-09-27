@@ -1,5 +1,6 @@
 # Скрипты должны выполняться в уже созданной БД
 # Создание таблицы character - персонажи
+DROP TABLE IF EXISTS `character`;
 create table `character`
 (
   id_character int auto_increment
@@ -14,6 +15,7 @@ create table `character`
 )
 ;
 # Создание таблицы character_history - история изменения персонажей
+DROP TABLE IF EXISTS `character_history`;
 create table character_history
 (
   id_character_history int not null
@@ -25,6 +27,7 @@ create table character_history
 )
 ;
 # Создание таблицы character_type - тип персонажа, базовые статы и тд
+DROP TABLE IF EXISTS `character_type`;
 create table character_type
 (
   id_character_type int auto_increment
@@ -37,6 +40,7 @@ create table character_type
 )
 ;
 # Создание таблицы match - матчи
+DROP TABLE IF EXISTS `match`;
 create table `match`
 (
   id_match int auto_increment
@@ -50,6 +54,7 @@ create table `match`
 )
 ;
 # Создание таблицы match_history - история матча, какие событи когда произошли
+DROP TABLE IF EXISTS `match_history`;
 create table match_history
 (
   id_match_history int auto_increment
@@ -61,6 +66,7 @@ create table match_history
 )
 ;
 # Создание таблицы match_history_action - действия вносимые в историю матча, убийство, ачивка, поражение и тд
+DROP TABLE IF EXISTS `match_history_action`;
 create table match_history_action
 (
   id_match_history_action int auto_increment
@@ -70,6 +76,7 @@ create table match_history_action
 )
 ;
 # Создание таблицы match_type - тип матча 2х2, 5х5 и тд
+DROP TABLE IF EXISTS `match_type`;
 create table match_type
 (
   id_match_type smallint(6) auto_increment
@@ -79,6 +86,7 @@ create table match_type
 )
 ;
 # Создание таблицы player - игрок, уровень, рейтинг и тд
+DROP TABLE IF EXISTS `player`;
 create table player
 (
   id_player int auto_increment
@@ -90,6 +98,7 @@ create table player
 )
 ;
 # Создание таблицы player_achievement - ачивки (не) полученные игроком
+DROP TABLE IF EXISTS `player_achievement`;
 create table player_achievement
 (
   id int auto_increment
@@ -100,6 +109,7 @@ create table player_achievement
 )
 ;
 # Создание таблицы player_history - история развития персонажа
+DROP TABLE IF EXISTS `player_history`;
 create table player_history
 (
   id_player_history int auto_increment
@@ -111,6 +121,7 @@ create table player_history
 )
 ;
 # Создание таблицы player_autorisation - авторизация игрока
+DROP TABLE IF EXISTS `player_autorisation`;
 create table player_autorisation
 (
   id_player_autorisation int auto_increment
