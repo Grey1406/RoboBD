@@ -76,6 +76,7 @@ call doiterate(@i);
 drop procedure doiterate;
 
 # Создание истории персонажей для игроков путем обновления персонажей
+
 UPDATE `character`
 SET param1 = param1 + 10,
   param2   = param2 + 11,
@@ -86,3 +87,16 @@ SET param1 = param1 + 21,
   param2   = param2 + 26,
   param3   = param3 + 28,
   modified = NOW()-INTERVAL 4 DAY;
+
+# Создание типов матчей
+
+INSERT INTO homestead.match_type (id_match_type, name, discription) VALUES (2, '2x2', 'just 2x2');
+INSERT INTO homestead.match_type (id_match_type, name, discription) VALUES (2, '2x2s', 'special 2x2');
+INSERT INTO homestead.match_type (id_match_type, name, discription) VALUES (2, '3x3', 'just 3x3');
+INSERT INTO homestead.match_type (id_match_type, name, discription) VALUES (2, '3x3s', 'special 3x3');
+INSERT INTO homestead.match_type (id_match_type, name, discription) VALUES (2, '5x5', 'just 5x5');
+INSERT INTO homestead.match_type (id_match_type, name, discription) VALUES (2, '5x5s', 'special 5x5');
+
+# Создание типов действий в истории матчей
+
+# Создание матчей и их истории
