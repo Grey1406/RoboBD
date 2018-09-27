@@ -67,15 +67,13 @@ create table `match`
 (
   id_match      int auto_increment
     primary key,
-  id_match_type smallint(6)  not null,
-  team1         varchar(200) not null
-  comment 'JSON',
-  team2         varchar(200) not null
-  comment 'JSON',
-  match_result  varchar(200) not null
-  comment 'JSON',
-  started       datetime     not null,
-  finished      datetime     not null
+  id_match_type smallint(6) not null,
+  character1    int         not null,
+  character2    int         not null,
+  score1        int         not null,
+  score2        int         not null,
+  started       datetime    not null,
+  finished      datetime    not null
 );
 # Создание таблицы match_history - история матча, какие событи когда произошли
 DROP TABLE IF EXISTS `match_history`;
@@ -167,13 +165,12 @@ create table player_history
 (
   id_player_history int auto_increment
     primary key,
-  id_player int not null,
-  nickname varchar(20) not null,
-  level tinyint not null,
-  rating smallint(6) not null,
-  modified datetime not null
-)
-;
+  id_player         int         not null,
+  nickname          varchar(20) not null,
+  level             tinyint     not null,
+  rating            smallint(6) not null,
+  modified          datetime    not null
+);
 # Создание таблицы player_autorisation - авторизация игрока
 DROP TABLE IF EXISTS `player_autorisation`;
 create table player_autorisation
