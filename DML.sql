@@ -32,6 +32,16 @@ create procedure doiterate(IN p1 int)
   END;
 call doiterate(@countPlayers);
 drop procedure doiterate;
+# Создание истории игроков путем обновления
+
+UPDATE player
+SET level  = level + ROUND(RAND() * 4, 0),
+  rating   = rating + ROUND(RAND() * 30, 0),
+  modified = NOW() - INTERVAL ROUND(RAND() * 3, 0) + 3 DAY;
+UPDATE player
+SET level  = level + ROUND(RAND() * 4, 0),
+  rating   = rating + ROUND(RAND() * 30, 0),
+  modified = NOW() - INTERVAL ROUND(RAND() * 3, 0) DAY;
 
 # Создание типов персонажей
 
@@ -56,15 +66,16 @@ create procedure doiterate(IN p1 int)
         VALUES ((SELECT id_player
                  FROM player
                  WHERE player.nickname = CONCAT('test', p1)),
-                @TypeNum, 25 + @TypeNum, 25 + @TypeNum * @TypeNum, 27, NOW() - INTERVAL 10 DAY,
+                @TypeNum, 25 + @TypeNum, 25 + @TypeNum * @TypeNum, 27, NOW() - INTERVAL ROUND(RAND() * 3, 0) + 8 DAY,
                 NOW() - INTERVAL 10 DAY);
         SET @TypeNum = (@TypeNum) % 3 + 1;
+        SET @newdate = NOW() - INTERVAL ROUND(RAND() * 2, 0) + 6 DAY;
         INSERT INTO `character` (id_player, id_character_type, param1,
                                  param2, param3, created, modified)
         VALUES ((SELECT id_player
                  FROM player
                  WHERE player.nickname = CONCAT('test', p1)),
-                @TypeNum, 25 + @TypeNum, 29, 25 + @TypeNum * @TypeNum, NOW() - INTERVAL 7 DAY, NOW() - INTERVAL 7 DAY);
+                @TypeNum, 25 + @TypeNum, 29, 25 + @TypeNum * @TypeNum, @newdate, @newdate);
         SET p1 = p1 - 1;
         ITERATE label1;
       END IF;
@@ -77,15 +88,15 @@ drop procedure doiterate;
 # Создание истории персонажей для игроков путем обновления персонажей
 
 UPDATE `character`
-SET param1 = param1 + 10,
-  param2   = param2 + 11,
-  param3   = param3 + 12,
-  modified = NOW() - INTERVAL 6 DAY;
+SET param1 = param1 + ROUND(RAND() * 30, 0),
+  param2   = param2 + ROUND(RAND() * 30, 0),
+  param3   = param3 + ROUND(RAND() * 30, 0),
+  modified = NOW() - INTERVAL ROUND(RAND() * 3, 0) + 3 DAY;
 UPDATE `character`
-SET param1 = param1 + 21,
-  param2   = param2 + 26,
-  param3   = param3 + 28,
-  modified = NOW() - INTERVAL 4 DAY;
+SET param1 = param1 + ROUND(RAND() * 30, 0),
+  param2   = param2 + ROUND(RAND() * 30, 0),
+  param3   = param3 + ROUND(RAND() * 30, 0),
+  modified = NOW() - INTERVAL ROUND(RAND() * 3, 0) DAY;
 
 # Создание типов матчей
 
