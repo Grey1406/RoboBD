@@ -26,15 +26,20 @@ create trigger character_AFTER_INSERT
       param2       = NEW.param1, param3 = NEW.param1, modified = NEW.modified;
   END;
 
-create trigger character_AFTER_UPDATE
+create trigger character_BEFORE_UPDATE
   after UPDATE
   on `character`
   for each row
   BEGIN
-    INSERT INTO character_history
-    Set
-      id_character = NEW.id_character, param1 = NEW.param1,
-      param2       = NEW.param1, param3 = NEW.param1, modified = NEW.modified;
+    if OLD.param1 != NEW.param1 OR
+       OLD.param2 != NEW.param2 OR
+       OLD.param3 != NEW.param3
+    THEN
+      INSERT INTO character_history
+      Set
+        id_character = NEW.id_character, param1 = NEW.param1,
+        param2       = NEW.param1, param3 = NEW.param1, modified = NEW.modified;
+    END IF;
   END;
 
 # Создание таблицы character_history - история изменения персонажей
@@ -87,6 +92,16 @@ create table match_history
   id_match_history_action int      not null,
   created                 datetime not null
 );
+
+create trigger match_history_AFTER_INSERT
+  after INSERT
+  on match_history
+  for each row
+  BEGIN
+    UPDATE `character`
+    SET lastActivity = NEW.created;
+  END;
+
 # Создание таблицы match_history_action - действия вносимые в историю матча, убийство, ачивка, поражение и тд
 DROP TABLE IF EXISTS `match_history_action`;
 create table match_history_action
