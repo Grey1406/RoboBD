@@ -9,8 +9,8 @@
 SET @countPlayers = 200;
 SET @countMatches = 2000;
 SET @TypeCharacter = 1;
-drop procedure IF EXISTS doiterate;
-create procedure doiterate(IN p1 int)
+drop procedure IF EXISTS createPlayer;
+create procedure createPlayer(IN p1 int)
   BEGIN
     label1: LOOP
       IF p1 > 0
@@ -33,8 +33,8 @@ create procedure doiterate(IN p1 int)
       LEAVE label1;
     END LOOP label1;
   END;
-call doiterate(@countPlayers);
-drop procedure doiterate;
+call createPlayer(@countPlayers);
+drop procedure createPlayer;
 
 # Создание истории игроков путем обновления
 
