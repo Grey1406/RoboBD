@@ -1,5 +1,6 @@
 # Скрипты должны выполняться в уже созданной БД
 # Создание таблицы character - персонажи
+
 DROP TABLE IF EXISTS `character`;
 create table `character`
 (
@@ -224,14 +225,16 @@ create table player_autorisation
   engine = MyISAM
   collate = utf8_unicode_ci;
 
-# create trigger player_autorisation_BEFORE_INSERT
-#   before INSERT
-#   on player_autorisation
-#   for each row
-#   BEGIN
-#     Set
-#     NEW.password = ENDEncryptByKey(Key_GUID('SSN_Key_01'), NEW.password);
-#   END;
+
+create trigger player_autorisation_BEFORE_INSERT
+  before INSERT
+  on player_autorisation
+  for each row
+  BEGIN
+    Set
+    NEW.full_name =md5(NEW.full_name),
+    NEW.password =md5(NEW.password);
+  END;
 
 # Выбрать по 3 часто используемых персонажа у трёх игроков с наивысшим рейтингом;
 # пока выбираются все персонажи, не знаю как ограничить
@@ -434,4 +437,134 @@ CREATE procedure get_kill_killed_table(IN year int)
 
     DROP TABLE IF EXISTS `time_table_for_get_kill_killed_table`;
   END;
+
+# Архивирование
+
+# Архивирование в отдельную таблицу игроков, давно не заходивших в игру*;
+DROP TABLE IF EXISTS `archive_player`;
+create table archive_player
+(
+  id_player    int auto_increment,
+  nickname     varchar(20)             not null,
+  level        tinyint default '1'     not null,
+  rating       smallint(6) default '0' not null,
+  created      datetime                not null,
+  modified     datetime                not null,
+  lastActivity datetime                not null,
+  UNIQUE KEY `fld_id` (id_player, lastActivity)
+)
+  PARTITION BY RANGE ( YEAR(lastActivity) ) (
+  PARTITION p_old VALUES LESS THAN (2017),
+  PARTITION p_previos VALUES LESS THAN (2018),
+  PARTITION p_now VALUES LESS THAN ( MAXVALUE )
+  );
+DROP TABLE IF EXISTS `archive_player_achievement`;
+create table archive_player_achievement
+(
+  id_player_achievement int auto_increment
+    primary key,
+  id_player             int                   not null,
+  achievement1          binary(1) default '0' not null,
+  achievement2          binary(1) default '0' not null,
+  achievement3          binary(1) default '0' not null
+);
+DROP TABLE IF EXISTS `archive_player_history`;
+create table archive_player_history
+(
+  id_player_history int auto_increment,
+  id_player         int         not null,
+  nickname          varchar(20) not null,
+  level             tinyint     not null,
+  rating            smallint(6) not null,
+  modified          datetime    not null,
+  UNIQUE KEY `fld_id` (id_player_history, id_player)
+)
+  PARTITION BY HASH (id_player)
+  PARTITIONS 10;
+
+drop procedure IF EXISTS store_archive_player_activity_less_then;
+CREATE procedure store_archive_player_activity_less_then(IN date DATETIME)
+  BEGIN
+    SET @Data=date;
+    #     Архивирование ачивок
+    INSERT INTO archive_player_achievement SELECT *
+                                           FROM player_achievement AS pa
+                                           WHERE (SELECT lastActivity
+                                                  FROM player
+                                                  WHERE player.id_player = pa.id_player) < @Data;
+    DELETE FROM player_achievement
+    WHERE (SELECT lastActivity
+           FROM player
+           WHERE player.id_player = id_player) < @Data;
+    #     Архивирование истории
+    INSERT INTO archive_player_history SELECT *
+                                       FROM player_history AS ph
+                                       WHERE (SELECT lastActivity
+                                              FROM player
+                                              WHERE player.id_player = ph.id_player) < @Data;
+    DELETE FROM player_history
+    WHERE (SELECT lastActivity
+           FROM player
+           WHERE player.id_player = id_player) < @Data;
+    #     Архивирование игрока
+    INSERT INTO archive_player SELECT *
+                               FROM player
+                               WHERE player.lastActivity < @Data;
+    DELETE FROM player
+    WHERE player.lastActivity < @Data;
+  END;
+
+#Архивирование в отдельную таблицу результатов матчей*.
+DROP TABLE IF EXISTS `archive_match`;
+create table `archive_match`
+(
+  id_match      int auto_increment,
+  id_match_type smallint(6) not null,
+  character1    int         not null,
+  character2    int         not null,
+  score1        int         not null,
+  score2        int         not null,
+  started       datetime    not null,
+  finished      datetime    not null,
+  UNIQUE KEY `fld_id` (id_match, started)
+)
+  PARTITION BY RANGE ( YEAR(started) ) (
+  PARTITION p_old VALUES LESS THAN (2017),
+  PARTITION p_previos VALUES LESS THAN (2018),
+  PARTITION p_now VALUES LESS THAN ( MAXVALUE )
+  );
+DROP TABLE IF EXISTS `archive_match_history`;
+create table archive_match_history
+(
+  id_match_history        int auto_increment,
+  id_match                int      not null,
+  id_character            int      not null,
+  id_match_history_action int      not null,
+  created                 datetime not null,
+  UNIQUE KEY `fld_id` (id_match_history, id_match)
+)
+  PARTITION BY HASH (id_match)
+  PARTITIONS 10;
+
+drop procedure IF EXISTS store_archive_match_started_less_then;
+CREATE procedure store_archive_match_started_less_then(IN date DATETIME)
+  BEGIN
+    #     Архивирование истории матча
+    INSERT INTO archive_match_history (SELECT *
+                                      FROM match_history AS MH
+                                      WHERE (SELECT started
+                                             FROM `match`
+                                             WHERE `match`.id_match = MH.id_match) < date);
+    DELETE FROM match_history
+    WHERE (SELECT started
+           FROM `match`
+           WHERE `match`.id_match = id_match) < '2015-01-01';
+    #     Архивирование матча
+    INSERT INTO archive_match (SELECT *
+                              FROM `match`
+                              WHERE `match`.started < date);
+    DELETE FROM `match`
+    WHERE `match`.started < date;
+  END;
+
 

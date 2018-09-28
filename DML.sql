@@ -6,8 +6,8 @@
 # Внесение данных о игроках и
 # их регистрации
 
-SET @countPlayers = 40;
-SET @countMatches = 200;
+SET @countPlayers = 200;
+SET @countMatches = 2000;
 SET @TypeCharacter = 1;
 drop procedure IF EXISTS doiterate;
 create procedure doiterate(IN p1 int)
