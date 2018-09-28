@@ -8,6 +8,7 @@
 
 SET @countPlayers = 40;
 SET @countMatches = 200;
+SET @TypeCharacter = 1;
 drop procedure IF EXISTS doiterate;
 create procedure doiterate(IN p1 int)
   BEGIN
@@ -37,6 +38,7 @@ drop procedure doiterate;
 
 # Создание истории игроков путем обновления
 
+drop procedure IF EXISTS updatePlayer;
 create procedure updatePlayer(IN p1 int)
   BEGIN
     label1: LOOP
@@ -85,22 +87,20 @@ INSERT INTO match_history_action (id_match_history_action, name, discription)
 VALUES (4, 'get_ach', 'get achievement');
 
 # Создание персонажей для игроков и их истории
-
+drop procedure IF EXISTS createCharacter;
 create procedure createCharacter(IN p1 int, IN p2 DATETIME)
   BEGIN
-    SET @TypeNum = 1;
     label1: LOOP
       IF p1 > 0
       THEN
-        SET @TypeNum = (@TypeNum) % 3 + 1;
+        SET @TypeCharacter = (@TypeCharacter) % 3 + 1;
         SET @Date = p2 - INTERVAL ROUND(RAND() * 200, 0) DAY;
         INSERT INTO `character` (id_player, id_character_type, param1,
                                  param2, param3, created, modified, lastActivity)
         VALUES ((SELECT id_player
                  FROM player
                  WHERE player.nickname = CONCAT('test', p1)),
-                @TypeNum, 25 + @TypeNum, 25 + @TypeNum * @TypeNum, 27, @Date, @Date, @Date);
-        SET @TypeNum = (@TypeNum) % 3 + 1;
+                @TypeCharacter, 25 + @TypeCharacter, 25 + @TypeCharacter * @TypeCharacter, 27, @Date, @Date, @Date);
         SET p1 = p1 - 1;
         ITERATE label1;
       END IF;
@@ -110,7 +110,7 @@ create procedure createCharacter(IN p1 int, IN p2 DATETIME)
 
 # Создание истории персонажей для игроков путем обновления персонажей
 
-
+drop procedure IF EXISTS updateCharacter;
 create procedure updateCharacter(IN p1 int)
   BEGIN
     label1: LOOP
@@ -132,6 +132,7 @@ call updateCharacter(2);
 
 # Создание матчей и их истории
 
+drop procedure IF EXISTS createMatch;
 create procedure createMatch(IN p1 int, IN p2 DATETIME)
   BEGIN
     SET @TypeNum = 1;
@@ -139,7 +140,7 @@ create procedure createMatch(IN p1 int, IN p2 DATETIME)
       IF p1 > 0
       THEN
         SET @DateStart = p2 - INTERVAL ROUND(RAND() * 200, 0) DAY;
-        SET @DateEND = @DateStart + INTERVAL ROUND(RAND() * 20, 0) MINUTE;
+        SET @DateEND = @DateStart + INTERVAL ROUND(RAND() * 20*60, 0) SECOND ;
         SET @Character1 = (SELECT id_character
                            FROM `character`
                            ORDER BY RAND()
@@ -228,16 +229,21 @@ create procedure createMatch(IN p1 int, IN p2 DATETIME)
 # 1 пачка
 call createCharacter(@countPlayers, NOW() - INTERVAL 200 day);
 call createMatch(@countMatches, NOW() - INTERVAL 200 day);
-call updatePlayer(2);
-call updateCharacter(2);
+call updatePlayer(1);
+call updateCharacter(1);
 # 2 пачка
-call createCharacter(@countPlayers, NOW() - INTERVAL 100 day);
-call createMatch(@countMatches * 2, NOW() - INTERVAL 100 day);
+call createCharacter(@countPlayers, NOW() - INTERVAL 150 day);
+call createMatch(@countMatches , NOW() - INTERVAL 150 day);
 call updatePlayer(1);
 call updateCharacter(1);
 # 3 пачка
+call createCharacter(@countPlayers, NOW() - INTERVAL 70 day);
+call createMatch(@countMatches, NOW() - INTERVAL 70 day);
+call updatePlayer(1);
+call updateCharacter(1);
+# 4 пачка
 call createCharacter(@countPlayers, NOW());
-call createMatch(@countMatches * 2, NOW());
+call createMatch(@countMatches , NOW());
 call updatePlayer(1);
 call updateCharacter(1);
 
