@@ -6,8 +6,11 @@
 # Внесение данных о игроках и
 # их регистрации
 
+# переменная сколько игроков сгенерировать
 SET @countPlayers = 200;
+# переменная сколько матчей сгенерировать за раз всего будет х4 матчей
 SET @countMatches = 2000;
+# переменная итерации, не трогать, не менять
 SET @TypeCharacter = 1;
 drop procedure IF EXISTS createPlayer;
 create procedure createPlayer(IN p1 int)
