@@ -11,7 +11,8 @@ create table `character`
   param2            smallint(6) not null,
   param3            smallint(6) not null,
   created           datetime    not null,
-  modified          datetime    not null
+  modified          datetime    not null,
+  lastActivity      varchar(45) null
 );
 
 create trigger character_AFTER_INSERT
@@ -108,13 +109,14 @@ create table match_type
 DROP TABLE IF EXISTS `player`;
 create table player
 (
-  id_player int auto_increment
+  id_player    int auto_increment
     primary key,
-  nickname  varchar(20)             not null,
-  level     tinyint default '1'     not null,
-  rating    smallint(6) default '0' not null,
-  created   datetime                not null,
-  modified  datetime                not null
+  nickname     varchar(20)             not null,
+  level        tinyint default '1'     not null,
+  rating       smallint(6) default '0' not null,
+  created      datetime                not null,
+  modified     datetime                not null,
+  lastActivity datetime                null
 );
 
 create trigger player_AFTER_INSERT

@@ -6,8 +6,8 @@
 # Внесение данных о игроках и
 # их регистрации
 
-SET @countPlayers = 100;
-SET @countMatches = 500;
+SET @countPlayers = 40;
+SET @countMatches = 200;
 drop procedure IF EXISTS doiterate;
 create procedure doiterate(IN p1 int)
   BEGIN
@@ -16,8 +16,8 @@ create procedure doiterate(IN p1 int)
       THEN
         SET @Date = NOW() - INTERVAL ROUND(RAND() * 200, 0) + 300 DAY;
         #         данные о игроках
-        INSERT INTO player (level, nickname, rating, created, modified)
-        VALUES (1, CONCAT('test', p1), 1, @Date, @Date);
+        INSERT INTO player (level, nickname, rating, created, modified, lastActivity)
+        VALUES (1, CONCAT('test', p1), 1, @Date, @Date, @Date);
         #         данные о их регистрации
         INSERT INTO player_autorisation
         (id_player, full_name, email, login, password, created)
@@ -37,18 +37,23 @@ drop procedure doiterate;
 
 # Создание истории игроков путем обновления
 
-UPDATE player
-SET level  = level + ROUND(RAND() * 5, 0),
-  rating   = rating + ROUND(RAND() * 40, 0),
-  modified = modified + INTERVAL ROUND(RAND() * 100, 0) DAY;
-UPDATE player
-SET level  = level + ROUND(RAND() * 5, 0),
-  rating   = rating + ROUND(RAND() * 40, 0),
-  modified = modified + INTERVAL ROUND(RAND() * 100, 0) DAY;
-UPDATE player
-SET level  = level + ROUND(RAND() * 5, 0),
-  rating   = rating + ROUND(RAND() * 40, 0),
-  modified = modified + INTERVAL ROUND(RAND() * 100, 0) DAY;
+create procedure updatePlayer(IN p1 int)
+  BEGIN
+    label1: LOOP
+      IF p1 > 0
+      THEN
+        UPDATE player
+        SET level      = level + ROUND(RAND() * 3, 0),
+          rating       = rating + ROUND(RAND() * 20, 0),
+          modified     = modified + INTERVAL ROUND(RAND() * 50, 0) DAY,
+          lastActivity = modified;
+        SET p1 = p1 - 1;
+        ITERATE label1;
+      END IF;
+      LEAVE label1;
+    END LOOP label1;
+  END;
+call updatePlayer(2);
 
 # Создание типов персонажей
 
@@ -81,7 +86,7 @@ VALUES (4, 'get_ach', 'get achievement');
 
 # Создание персонажей для игроков и их истории
 
-create procedure createCharacter(IN p1 int,IN p2 DATETIME)
+create procedure createCharacter(IN p1 int, IN p2 DATETIME)
   BEGIN
     SET @TypeNum = 1;
     label1: LOOP
@@ -90,43 +95,51 @@ create procedure createCharacter(IN p1 int,IN p2 DATETIME)
         SET @TypeNum = (@TypeNum) % 3 + 1;
         SET @Date = p2 - INTERVAL ROUND(RAND() * 200, 0) DAY;
         INSERT INTO `character` (id_player, id_character_type, param1,
-                                 param2, param3, created, modified)
+                                 param2, param3, created, modified, lastActivity)
         VALUES ((SELECT id_player
                  FROM player
                  WHERE player.nickname = CONCAT('test', p1)),
-                @TypeNum, 25 + @TypeNum, 25 + @TypeNum * @TypeNum, 27, @Date, @Date);
+                @TypeNum, 25 + @TypeNum, 25 + @TypeNum * @TypeNum, 27, @Date, @Date, @Date);
         SET @TypeNum = (@TypeNum) % 3 + 1;
         SET p1 = p1 - 1;
         ITERATE label1;
       END IF;
       LEAVE label1;
     END LOOP label1;
-
-    # Создание истории персонажей для игроков путем обновления персонажей
-
-    UPDATE `character`
-    SET param1 = param1 + ROUND(RAND() * 30, 0),
-      param2   = param2 + ROUND(RAND() * 30, 0),
-      param3   = param3 + ROUND(RAND() * 30, 0),
-      modified = modified + INTERVAL ROUND(RAND() * 100, 0) DAY;
-    UPDATE `character`
-    SET param1 = param1 + ROUND(RAND() * 30, 0),
-      param2   = param2 + ROUND(RAND() * 30, 0),
-      param3   = param3 + ROUND(RAND() * 30, 0),
-      modified = modified + INTERVAL ROUND(RAND() * 100, 0) DAY;
   END;
 
+# Создание истории персонажей для игроков путем обновления персонажей
+
+
+create procedure updateCharacter(IN p1 int)
+  BEGIN
+    label1: LOOP
+      IF p1 > 0
+      THEN
+        UPDATE `character`
+        SET param1     = param1 + ROUND(RAND() * 10, 0),
+          param2       = param2 + ROUND(RAND() * 10, 0),
+          param3       = param3 + ROUND(RAND() * 10, 0),
+          modified     = modified + INTERVAL ROUND(RAND() * 50, 0) DAY,
+          lastActivity = modified;
+        SET p1 = p1 - 1;
+        ITERATE label1;
+      END IF;
+      LEAVE label1;
+    END LOOP label1;
+  END;
+call updateCharacter(2);
 
 # Создание матчей и их истории
 
-create procedure createMatch(IN p1 int,IN p2 DATETIME)
+create procedure createMatch(IN p1 int, IN p2 DATETIME)
   BEGIN
     SET @TypeNum = 1;
     label1: LOOP
       IF p1 > 0
       THEN
         SET @DateStart = p2 - INTERVAL ROUND(RAND() * 200, 0) DAY;
-        SET @DateEND = @DateStart+INTERVAL ROUND(RAND() * 20, 0) MINUTE;
+        SET @DateEND = @DateStart + INTERVAL ROUND(RAND() * 20, 0) MINUTE;
         SET @Character1 = (SELECT id_character
                            FROM `character`
                            ORDER BY RAND()
@@ -139,7 +152,7 @@ create procedure createMatch(IN p1 int,IN p2 DATETIME)
         SET @Score2 = ROUND(RAND() * 100, 0);
         INSERT INTO `match`
         (id_match_type, character1, character2, score1, score2, started, finished)
-        VALUES (@TypeNum, @Character1, @Character2, @Score1, @Score2,@DateStart, @DateEND );
+        VALUES (@TypeNum, @Character1, @Character2, @Score1, @Score2, @DateStart, @DateEND);
 
         # внесение записей в историю мачта
 
@@ -148,56 +161,56 @@ create procedure createMatch(IN p1 int,IN p2 DATETIME)
                    ORDER BY id_match DESC
                    LIMIT 1);
 
-        SET @DateAction = @DateStart+ INTERVAL ROUND(RAND() *TIME_TO_SEC(TIMEDIFF(@DateEND,@DateStart))) SECOND ;
+        SET @DateAction = @DateStart + INTERVAL ROUND(RAND() * TIME_TO_SEC(TIMEDIFF(@DateEND, @DateStart))) SECOND;
         INSERT INTO `match_history`
         (id_match, id_character, id_match_history_action, created)
         VALUES (@id, @Character1, (SELECT id_match_history_action
                                    FROM match_history_action
                                    ORDER BY RAND()
                                    LIMIT 1), @DateAction);
-        SET @DateAction = @DateStart+ INTERVAL ROUND(RAND() *TIME_TO_SEC(TIMEDIFF(@DateEND,@DateStart))) SECOND ;
+        SET @DateAction = @DateStart + INTERVAL ROUND(RAND() * TIME_TO_SEC(TIMEDIFF(@DateEND, @DateStart))) SECOND;
         INSERT INTO `match_history`
         (id_match, id_character, id_match_history_action, created)
         VALUES (@id, @Character1, (SELECT id_match_history_action
                                    FROM match_history_action
                                    ORDER BY RAND()
                                    LIMIT 1), @DateAction);
-        SET @DateAction = @DateStart+ INTERVAL ROUND(RAND() *TIME_TO_SEC(TIMEDIFF(@DateEND,@DateStart))) SECOND ;
+        SET @DateAction = @DateStart + INTERVAL ROUND(RAND() * TIME_TO_SEC(TIMEDIFF(@DateEND, @DateStart))) SECOND;
         INSERT INTO `match_history`
         (id_match, id_character, id_match_history_action, created)
         VALUES (@id, @Character1, (SELECT id_match_history_action
                                    FROM match_history_action
                                    ORDER BY RAND()
                                    LIMIT 1), @DateAction);
-        SET @DateAction = @DateStart+ INTERVAL ROUND(RAND() *TIME_TO_SEC(TIMEDIFF(@DateEND,@DateStart))) SECOND ;
+        SET @DateAction = @DateStart + INTERVAL ROUND(RAND() * TIME_TO_SEC(TIMEDIFF(@DateEND, @DateStart))) SECOND;
         INSERT INTO `match_history`
         (id_match, id_character, id_match_history_action, created)
         VALUES (@id, @Character1, (SELECT id_match_history_action
                                    FROM match_history_action
                                    ORDER BY RAND()
                                    LIMIT 1), @DateAction);
-        SET @DateAction = @DateStart+ INTERVAL ROUND(RAND() *TIME_TO_SEC(TIMEDIFF(@DateEND,@DateStart))) SECOND ;
+        SET @DateAction = @DateStart + INTERVAL ROUND(RAND() * TIME_TO_SEC(TIMEDIFF(@DateEND, @DateStart))) SECOND;
         INSERT INTO `match_history`
         (id_match, id_character, id_match_history_action, created)
         VALUES (@id, @Character2, (SELECT id_match_history_action
                                    FROM match_history_action
                                    ORDER BY RAND()
                                    LIMIT 1), @DateAction);
-        SET @DateAction = @DateStart+ INTERVAL ROUND(RAND() *TIME_TO_SEC(TIMEDIFF(@DateEND,@DateStart))) SECOND ;
+        SET @DateAction = @DateStart + INTERVAL ROUND(RAND() * TIME_TO_SEC(TIMEDIFF(@DateEND, @DateStart))) SECOND;
         INSERT INTO `match_history`
         (id_match, id_character, id_match_history_action, created)
         VALUES (@id, @Character2, (SELECT id_match_history_action
                                    FROM match_history_action
                                    ORDER BY RAND()
                                    LIMIT 1), @DateAction);
-        SET @DateAction = @DateStart+ INTERVAL ROUND(RAND() *TIME_TO_SEC(TIMEDIFF(@DateEND,@DateStart))) SECOND ;
+        SET @DateAction = @DateStart + INTERVAL ROUND(RAND() * TIME_TO_SEC(TIMEDIFF(@DateEND, @DateStart))) SECOND;
         INSERT INTO `match_history`
         (id_match, id_character, id_match_history_action, created)
         VALUES (@id, @Character2, (SELECT id_match_history_action
                                    FROM match_history_action
                                    ORDER BY RAND()
                                    LIMIT 1), @DateAction);
-        SET @DateAction = @DateStart+ INTERVAL ROUND(RAND() *TIME_TO_SEC(TIMEDIFF(@DateEND,@DateStart))) SECOND ;
+        SET @DateAction = @DateStart + INTERVAL ROUND(RAND() * TIME_TO_SEC(TIMEDIFF(@DateEND, @DateStart))) SECOND;
         INSERT INTO `match_history`
         (id_match, id_character, id_match_history_action, created)
         VALUES (@id, @Character2, (SELECT id_match_history_action
@@ -212,13 +225,24 @@ create procedure createMatch(IN p1 int,IN p2 DATETIME)
     END LOOP label1;
   END;
 
-
 # 1 пачка
-call createCharacter(@countPlayers,NOW()-INTERVAL 200 day );
-call createMatch(@countMatches,NOW()-INTERVAL 200 day);
+call createCharacter(@countPlayers, NOW() - INTERVAL 200 day);
+call createMatch(@countMatches, NOW() - INTERVAL 200 day);
+call updatePlayer(2);
+call updateCharacter(2);
 # 2 пачка
-call createCharacter(@countPlayers,NOW());
-call createMatch(@countMatches*2,NOW());
+call createCharacter(@countPlayers, NOW() - INTERVAL 100 day);
+call createMatch(@countMatches * 2, NOW() - INTERVAL 100 day);
+call updatePlayer(1);
+call updateCharacter(1);
+# 3 пачка
+call createCharacter(@countPlayers, NOW());
+call createMatch(@countMatches * 2, NOW());
+call updatePlayer(1);
+call updateCharacter(1);
 
+# Сброс процедур
 drop procedure createCharacter;
 drop procedure createMatch;
+drop procedure updatePlayer;
+drop procedure updateCharacter;
