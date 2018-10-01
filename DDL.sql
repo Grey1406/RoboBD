@@ -16,6 +16,12 @@ create table `character`
   lastActivity      datetime    not null
 );
 
+create index id_character_type
+  on `character` (id_character_type);
+
+create index id_player
+  on `character` (id_player);
+
 create trigger character_AFTER_INSERT
   after INSERT
   on `character`
@@ -82,13 +88,16 @@ create table `match`
   score2        int         not null,
   started       datetime    not null,
   finished      datetime    not null,
-  UNIQUE KEY `fld_id` (id_match, started)
-)
-  PARTITION BY RANGE ( YEAR(started) ) (
-  PARTITION p_old VALUES LESS THAN (2017),
-  PARTITION p_previos VALUES LESS THAN (2018),
-  PARTITION p_now VALUES LESS THAN ( MAXVALUE )
-  );
+  constraint fld_id
+  unique (id_match, started)
+);
+
+create index id_match_type
+  on `match` (id_match_type);
+
+create index started
+  on `match` (started);
+
 # Создание таблицы match_history - история матча, какие событи когда произошли
 DROP TABLE IF EXISTS `match_history`;
 create table match_history
@@ -143,13 +152,12 @@ create table player
   created      datetime                not null,
   modified     datetime                not null,
   lastActivity datetime                not null,
-  UNIQUE KEY `fld_id` (id_player, lastActivity)
-)
-  PARTITION BY RANGE ( YEAR(lastActivity) ) (
-  PARTITION p_old VALUES LESS THAN (2017),
-  PARTITION p_previos VALUES LESS THAN (2018),
-  PARTITION p_now VALUES LESS THAN ( MAXVALUE )
-  );
+  constraint fld_id
+  unique (id_player, lastActivity)
+);
+
+create index level_rating
+  on player (level, rating);
 
 create trigger player_AFTER_INSERT
   after INSERT
@@ -232,8 +240,8 @@ create trigger player_autorisation_BEFORE_INSERT
   for each row
   BEGIN
     Set
-    NEW.full_name =md5(NEW.full_name),
-    NEW.password =md5(NEW.password);
+    NEW.full_name = md5(NEW.full_name),
+    NEW.password = md5(NEW.password);
   END;
 
 # Выбрать по 3 часто используемых персонажа у трёх игроков с наивысшим рейтингом;
@@ -485,7 +493,7 @@ create table archive_player_history
 drop procedure IF EXISTS store_archive_player_activity_less_then;
 CREATE procedure store_archive_player_activity_less_then(IN date DATETIME)
   BEGIN
-    SET @Data=date;
+    SET @Data = date;
     #     Архивирование ачивок
     INSERT INTO archive_player_achievement SELECT *
                                            FROM player_achievement AS pa
@@ -551,18 +559,18 @@ CREATE procedure store_archive_match_started_less_then(IN date DATETIME)
   BEGIN
     #     Архивирование истории матча
     INSERT INTO archive_match_history (SELECT *
-                                      FROM match_history AS MH
-                                      WHERE (SELECT started
-                                             FROM `match`
-                                             WHERE `match`.id_match = MH.id_match) < date);
+                                       FROM match_history AS MH
+                                       WHERE (SELECT started
+                                              FROM `match`
+                                              WHERE `match`.id_match = MH.id_match) < date);
     DELETE FROM match_history
     WHERE (SELECT started
            FROM `match`
            WHERE `match`.id_match = id_match) < '2015-01-01';
     #     Архивирование матча
     INSERT INTO archive_match (SELECT *
-                              FROM `match`
-                              WHERE `match`.started < date);
+                               FROM `match`
+                               WHERE `match`.started < date);
     DELETE FROM `match`
     WHERE `match`.started < date;
   END;
